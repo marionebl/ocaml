@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: Prepare
-          command: apk add m4
+          command: sudo apk add m4
       - run:
           name: Install
           command: opam install ocamlfind core base ounit qcheck react ppx_deriving
