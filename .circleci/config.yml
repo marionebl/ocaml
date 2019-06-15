@@ -10,7 +10,7 @@ jobs:
           name: Prepare
           command: sudo apk add m4 linux-headers
       - restore-cache:
-        key: v1
+          key: v1
       - run:
           name: Install
           command: opam install dune ocamlfind core base ounit qcheck react ppx_deriving
