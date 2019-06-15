@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ocaml/opam2
+      - image: ocaml/opam2:alpine
     steps:
       - checkout
       - run:
