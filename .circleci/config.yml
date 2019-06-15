@@ -14,4 +14,4 @@ jobs:
           command: opam install dune ocamlfind core base ounit qcheck react ppx_deriving
       - run:
           name: Test
-          command: make test
+          command: eval $(opam env) && make test
