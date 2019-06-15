@@ -1,7 +1,6 @@
-type t
+type t = ()
 
-let new_game =
-    failwith "'new_game' is missing"
+let new_game = ()
 
 let roll _ _ =
     failwith "'roll' is missing"

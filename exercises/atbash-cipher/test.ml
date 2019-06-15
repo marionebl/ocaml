@@ -1,46 +1,52 @@
 open OUnit2
 open Atbash_cipher
 
-let ae exp got _test_ctxt = assert_equal ~printer:(fun x -> x) exp got
+let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skip_if (skippable && cond) "Skipped"
+
+let ae ?(skip=false) exp got _test_ctxt = 
+  sk skip;
+  assert_equal ~printer:(fun x -> x) exp (got ())
 
 let encode_tests = [
    "encode yes" >::
-     ae "bvh" (encode "yes");
+     ae ~skip:true "bvh" (fun _ -> encode "yes");
    "encode no" >::
-     ae "ml" (encode "no");
+     ae ~skip:true "ml" (fun _ -> encode "no");
    "encode OMG" >::
-     ae "lnt" (encode "OMG");
+     ae ~skip:true "lnt" (fun _ -> encode "OMG");
    "encode spaces" >::
-     ae "lnt" (encode "O M G");
+     ae ~skip:true "lnt" (fun _ -> encode "O M G");
    "encode mindblowingly" >::
-     ae "nrmwy oldrm tob" (encode "mindblowingly");
+     ae ~skip:true "nrmwy oldrm tob" (fun _ -> encode "mindblowingly");
    "encode numbers" >::
-     ae "gvhgr mt123 gvhgr mt" (encode "Testing,1 2 3, testing.");
+     ae ~skip:true "gvhgr mt123 gvhgr mt" (fun _ -> encode "Testing,1 2 3, testing.");
    "encode deep thought" >::
-     ae "gifgs rhurx grlm" (encode "Truth is fiction.");
+     ae ~skip:true "gifgs rhurx grlm" (fun _ -> encode "Truth is fiction.");
    "encode all the letters" >::
-     ae "gsvjf rxpyi ldmul cqfnk hlevi gsvoz abwlt" (encode "The quick brown fox jumps over the lazy dog.");
+     ae ~skip:true "gsvjf rxpyi ldmul cqfnk hlevi gsvoz abwlt" (fun _ -> encode "The quick brown fox jumps over the lazy dog.");
 ]
 
 
 let decode_tests = [
    "decode exercism" >::
-     ae "exercism" (decode "vcvix rhn");
+     ae ~skip:true "exercism" (fun _ -> decode "vcvix rhn");
    "decode a sentence" >::
-     ae "anobstacleisoftenasteppingstone" (decode "zmlyh gzxov rhlug vmzhg vkkrm thglm v");
+     ae ~skip:true "anobstacleisoftenasteppingstone" (fun _ -> decode "zmlyh gzxov rhlug vmzhg vkkrm thglm v");
    "decode numbers" >::
-     ae "testing123testing" (decode "gvhgr mt123 gvhgr mt");
+     ae ~skip:true "testing123testing" (fun _ -> decode "gvhgr mt123 gvhgr mt");
    "decode all the letters" >::
-     ae "thequickbrownfoxjumpsoverthelazydog" (decode "gsvjf rxpyi ldmul cqfnk hlevi gsvoz abwlt");
+     ae ~skip:true "thequickbrownfoxjumpsoverthelazydog" (fun _ -> decode "gsvjf rxpyi ldmul cqfnk hlevi gsvoz abwlt");
    "decode with too many spaces" >::
-     ae "exercism" (decode "vc vix    r hn");
+     ae ~skip:true "exercism" (fun _ -> decode "vc vix    r hn");
    "decode with no spaces" >::
-     ae "anobstacleisoftenasteppingstone" (decode "zmlyhgzxovrhlugvmzhgvkkrmthglmv");
+     ae ~skip:true "anobstacleisoftenasteppingstone" (fun _ -> decode "zmlyhgzxovrhlugvmzhgvkkrmthglmv");
 ]
 
 let different_block_size_test = [
   "encode mindblowingly with a different block size" >::
-    ae "n r m w y o l d r m t o b" (encode ~block_size:1 "mindblowingly");
+    ae ~skip:true "n r m w y o l d r m t o b" (fun _ -> encode ~block_size:1 "mindblowingly");
 ]
 
 let () =

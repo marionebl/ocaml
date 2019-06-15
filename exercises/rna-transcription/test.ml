@@ -3,23 +3,31 @@ open OUnit2
 
 let char_of_variant = function
   | `A -> 'A' | `C -> 'C' | `G -> 'G' | `T -> 'T' | `U -> 'U'
+
 let printer l = List.map ~f:char_of_variant l |> String.of_char_list
-let ae exp got _test_ctxt = assert_equal ~printer exp got
+
+let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skip_if (skippable && cond) "Skipped"
+
+let ae ~skip exp got _test_ctxt = 
+  sk skip;
+  assert_equal ~printer exp (got ())
 
 let tests =
   ["transcribes empty list">::
-    ae [] (Rna_transcription.to_rna []);
+    ae ~skip:true [] (fun _ -> Rna_transcription .to_rna []);
    "transcribes cytidine">::
-    ae [`G] (Rna_transcription.to_rna [`C]);
+    ae ~skip:true [`G] (fun _ -> Rna_transcription .to_rna [`C]);
    "transcribes guanosine">::
-    ae [`C] (Rna_transcription.to_rna [`G]);
+    ae ~skip:true [`C] (fun _ -> Rna_transcription .to_rna [`G]);
    "transcribes adenosie">::
-    ae [`U] (Rna_transcription.to_rna [`A]);
+    ae ~skip:true [`U] (fun _ -> Rna_transcription .to_rna [`A]);
    "transcribes thymidine">::
-    ae [`A] (Rna_transcription.to_rna [`T]);
+    ae ~skip:true [`A] (fun _ -> Rna_transcription .to_rna [`T]);
    "transcribes multiple">::
-    ae [`U; `G; `C; `A; `C; `C; `A; `G; `A; `A; `U; `U]
-       (Rna_transcription.to_rna [`A; `C; `G; `T; `G; `G; `T; `C; `T; `T; `A; `A])
+    ae ~skip:true [`U; `G; `C; `A; `C; `C; `A; `G; `A; `A; `U; `U]
+       (fun _ -> Rna_transcription .to_rna [`A; `C; `G; `T; `G; `G; `T; `C; `T; `T; `A; `A])
   ]
 
 let () =

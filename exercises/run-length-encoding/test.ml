@@ -1,44 +1,49 @@
 open Base
 open OUnit2
 open Run_length_encoding
+let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skip_if (skippable && cond) "Skipped"
 
-let ae exp got _test_ctxt = assert_equal exp got ~printer:Fn.id
+let ae ~skip exp got _test_ctxt = 
+  sk skip;
+  assert_equal exp (got ()) ~printer:Fn.id
 
 let encode_tests = [
    "empty string" >::
-     ae "" (encode "");
+     ae ~skip:true "" (fun _ -> encode "");
    "single characters only are encoded without count" >::
-     ae "XYZ" (encode "XYZ");
+     ae ~skip:true "XYZ" (fun _ -> encode "XYZ");
    "string with no single characters" >::
-     ae "2A3B4C" (encode "AABBBCCCC");
+     ae ~skip:true "2A3B4C" (fun _ -> encode "AABBBCCCC");
    "single characters mixed with repeated characters" >::
-     ae "12WB12W3B24WB" (encode "WWWWWWWWWWWWBWWWWWWWWWWWWBBBWWWWWWWWWWWWWWWWWWWWWWWWB");
+     ae ~skip:true "12WB12W3B24WB" (fun _ -> encode "WWWWWWWWWWWWBWWWWWWWWWWWWBBBWWWWWWWWWWWWWWWWWWWWWWWWB");
    "multiple whitespace mixed in string" >::
-     ae "2 hs2q q2w2 " (encode "  hsqq qww  ");
+     ae ~skip:true "2 hs2q q2w2 " (fun _ -> encode "  hsqq qww  ");
    "lowercase characters" >::
-     ae "2a3b4c" (encode "aabbbcccc");
+     ae ~skip:true "2a3b4c" (fun _ -> encode "aabbbcccc");
 ]
 
 
 let decode_tests = [
    "empty string" >::
-     ae "" (decode "");
+     ae ~skip:true "" (fun _ -> decode "");
    "single characters only" >::
-     ae "XYZ" (decode "XYZ");
+     ae ~skip:true "XYZ" (fun _ -> decode "XYZ");
    "string with no single characters" >::
-     ae "AABBBCCCC" (decode "2A3B4C");
+     ae ~skip:true "AABBBCCCC" (fun _ -> decode "2A3B4C");
    "single characters with repeated characters" >::
-     ae "WWWWWWWWWWWWBWWWWWWWWWWWWBBBWWWWWWWWWWWWWWWWWWWWWWWWB" (decode "12WB12W3B24WB");
+     ae ~skip:true "WWWWWWWWWWWWBWWWWWWWWWWWWBBBWWWWWWWWWWWWWWWWWWWWWWWWB" (fun _ -> decode "12WB12W3B24WB");
    "multiple whitespace mixed in string" >::
-     ae "  hsqq qww  " (decode "2 hs2q q2w2 ");
+     ae ~skip:true "  hsqq qww  " (fun _ -> decode "2 hs2q q2w2 ");
    "lower case string" >::
-     ae "aabbbcccc" (decode "2a3b4c");
+     ae ~skip:true "aabbbcccc" (fun _ -> decode "2a3b4c");
 ]
 
 
 let encode_and_then_decode_tests = [
    "encode followed by decode gives original string" >::
-     ae "zzz ZZ  zZ" (encode "zzz ZZ  zZ" |> decode);
+     ae ~skip:true "zzz ZZ  zZ" (fun _ -> encode "zzz ZZ  zZ" |> decode);
 ]
 
 let () =

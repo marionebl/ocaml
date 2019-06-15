@@ -1,10 +1,10 @@
 type robot
 
-let new_robot =
+let new_robot _ =
     failwith "'new_robot' is missing"
 
-let name = 
+let name _ = 
     failwith "'name' is missing"
 
-let reset =
+let reset _ =
     failwith "'reset' is missing"

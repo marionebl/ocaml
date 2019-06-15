@@ -24,7 +24,7 @@ test-assignment:
 	@echo "running tests for: $(ASSIGNMENT)"
 	@cp -r ./exercises/$(ASSIGNMENT)/* $(OUTDIR)
 	@cp ./exercises/$(ASSIGNMENT)/$(EXAMPLE) $(OUTDIR)/$(SRCFILE).$(FILEEXT)
-	@make -C $(OUTDIR)
+	@make FORCE=true -C $(OUTDIR)
 	@rm -rf $(OUTDIR)
 
 testgenerator:

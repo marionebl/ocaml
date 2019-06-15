@@ -1,0 +1,4 @@
+lib: [
+  "_build/install/default/lib/hello_world/META" {"META"}
+  "_build/install/default/lib/hello_world/opam" {"opam"}
+]

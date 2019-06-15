@@ -10,20 +10,24 @@ let format_board strings =
   let line s = "|" ^ s ^ "|\n" in
   "\n" ^ border_line ^ String.concat (List.map strings ~f:line) ^ border_line
 
-(* Assert Equals *)
-let ae exp got =
-  assert_equal exp got ~cmp:(List.equal String.equal) ~printer:format_board
+(* Assert Equals *)let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skip_if (skippable && cond) "Skipped"
+
+let ae ~skip exp got =
+  sk skip;
+  assert_equal exp (got ()) ~cmp:(List.equal String.equal) ~printer:format_board
 
 let tests = [
   "no rows" >:: (fun _ ->
     let b = [] in
     let expected = [] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "no columns" >:: (fun _ ->
     let b = [""] in
     let expected = [""] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "no mines" >:: (fun _ ->
     let b = ["   ";
@@ -32,7 +36,7 @@ let tests = [
     let expected = ["   ";
                     "   ";
                     "   "] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "board with only mines" >:: (fun _ ->
     let b = ["***";
@@ -41,7 +45,7 @@ let tests = [
     let expected = ["***";
                     "***";
                     "***"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "mine surrounded by spaces" >:: (fun _ ->
     let b = ["   ";
@@ -50,7 +54,7 @@ let tests = [
     let expected = ["111";
                     "1*1";
                     "111"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "space surrounded by mines" >:: (fun _ ->
     let b = ["***";
@@ -59,17 +63,17 @@ let tests = [
     let expected = ["***";
                     "*8*";
                     "***"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "horizontal line" >:: (fun _ ->
     let b = [" * * "] in
     let expected = ["1*2*1"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "horizontal line, mines at edges" >:: (fun _ ->
     let b = ["*   *"] in
     let expected = ["*1 1*"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "vertical line" >:: (fun _ ->
     let b = [" ";
@@ -82,7 +86,7 @@ let tests = [
                     "2";
                     "*";
                     "1"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "vertical line, mines at edges" >:: (fun _ ->
     let b = ["*";
@@ -95,7 +99,7 @@ let tests = [
                     " ";
                     "1";
                     "*"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "cross" >:: (fun _ ->
     let b = ["  *  ";
@@ -108,7 +112,7 @@ let tests = [
                     "*****";
                     "25*52";
                     " 2*2 "] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
   "large board" >:: (fun _ ->
     let b = [" *  * ";
@@ -123,7 +127,7 @@ let tests = [
                     "112*4*";
                     "1*22*2";
                     "111111"] in
-    ae expected (annotate b)
+    ae ~skip:true expected (fun _ -> annotate b)
   );
 ]
 

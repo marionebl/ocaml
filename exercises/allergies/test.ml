@@ -75,22 +75,26 @@ let print_allergic_to_fail exp act (allergen, score) =
   ^ "  Expected: " ^ exp ^ "\n"
   ^ "  Actual:   " ^ act ^ "\n"
 
+let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skippable && cond
+
 (* Property: `allergic_to score allergen` works for every mapping. *)
-let prop_allergic_to_single_allergens =
-  QCheck.Test.make ~count:1000 ~name:"prop_allergic_to_single_allergens"
-    (QCheck.make allergen_gen ~print:(print_allergic_to_fail "true" "false"))
-    (fun (allergen, score) -> allergic_to score allergen)
+let prop_allergic_to_single_allergens ~skip =
+    QCheck.Test.make ~count:1000 ~name:"prop_allergic_to_single_allergens"
+      (QCheck.make allergen_gen ~print:(print_allergic_to_fail "true" "false"))
+      (fun (allergen, score) -> sk skip || allergic_to score allergen)
 
 (* Negative property: `allergic_to score allergen` fails for every `score`
    that represents a single allergen when `allergen` isn't that allergen. *)
-let prop_allergic_to_negative_single_allergens =
+let prop_allergic_to_negative_single_allergens ~skip =
   QCheck.Test.make ~count:1000 ~name:"prop_allergic_to_negative_single_allergens"
     (QCheck.make allergen_complement_gen ~print:(print_allergic_to_fail "false" "true"))
-    (fun (complement_allergen, score) -> not (allergic_to score complement_allergen))
+    (fun (complement_allergen, score) -> sk skip || not (allergic_to score complement_allergen))
 
 (* Property: `allergic_to score allergen` succeeds for every `allergen` that
    is represented in `score`. *)
-let prop_allergic_to_multiple_allergens =
+let prop_allergic_to_multiple_allergens ~skip =
   let print (allergens, score) =
     List.filter_map allergens ~f:(fun allergen ->
         if not (allergic_to score allergen)
@@ -99,7 +103,7 @@ let prop_allergic_to_multiple_allergens =
     |> String.concat ~sep:"\n\n"
   in QCheck.Test.make ~count:1000 ~name:"prop_allergic_to_multiple_allergens"
        (QCheck.make allergens_gen ~print)
-       (fun (allergens, score) -> List.for_all allergens ~f:(allergic_to score))
+       (fun (allergens, score) -> sk skip || List.for_all allergens ~f:(allergic_to score))
 
 (* Pretty-printer of `allergies` failure. *)
 let print_allergies_fail (allergens, score) =
@@ -108,23 +112,23 @@ let print_allergies_fail (allergens, score) =
   ^ "  Actual:   " ^ print_allergens (allergies score)
 
 (* Property: `allergies score == [allergen]` when `allergen` has `score`. *)
-let prop_allergies_single_allergens =
+let prop_allergies_single_allergens ~skip =
   let print (allergen, score) = print_allergies_fail ([allergen], score) in
   QCheck.Test.make ~count:1000 ~name:"prop_allergies_single_allergens"
     (QCheck.make allergen_gen ~print)
-    (fun (allergen, score) -> Poly.equal (allergies score) [allergen])
+    (fun (allergen, score) -> sk skip || Poly.equal (allergies score) [allergen])
 
 (* Property: `allergies score` lists all allergens for `score`. *)
-let prop_allergies_multiple_allergens =
+let prop_allergies_multiple_allergens ~skip =
   QCheck.Test.make ~count:1000 ~name:"prop_allergies_multiple_allergens"
     (QCheck.make allergens_gen ~print:print_allergies_fail)
-    (fun (allergens, score) -> Poly.equal (allergies score) allergens)
+    (fun (allergens, score) -> sk skip || Poly.equal (allergies score) allergens)
 
 let _ =
   QCheck_runner.run_tests ~verbose:true ~colors:true
-    [ prop_allergic_to_single_allergens
-    ; prop_allergic_to_negative_single_allergens
-    ; prop_allergic_to_multiple_allergens
-    ; prop_allergies_single_allergens
-    ; prop_allergies_multiple_allergens
+    [ prop_allergic_to_single_allergens ~skip:true
+    ; prop_allergic_to_negative_single_allergens ~skip:true
+    ; prop_allergic_to_multiple_allergens ~skip:true
+    ; prop_allergies_single_allergens ~skip:true
+    ; prop_allergies_multiple_allergens ~skip:true
     ]

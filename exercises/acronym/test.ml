@@ -1,24 +1,29 @@
 open OUnit2
 open Acronym
 
-let ae exp got _test_ctxt =
-  assert_equal exp got ~printer:(fun x -> x )
+let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skip_if (skippable && cond) "Skipped"
+
+let ae ?(skip=false) exp got _test_ctxt  =
+  sk skip;
+  assert_equal exp (got ()) ~printer:(fun x -> x)
 
 let tests = [
   "basic" >::
-    ae "PNG" (acronym "Portable Network Graphics");
+    ae ~skip:true "PNG" (fun _ -> acronym "Portable Network Graphics");
   "lowercase words" >::
-    ae "ROR" (acronym "Ruby on Rails");
+    ae ~skip:true "ROR" (fun _ -> acronym "Ruby on Rails");
   "punctuation" >::
-    ae "FIFO" (acronym "First In, First Out");
+    ae ~skip:true "FIFO" (fun _ -> acronym "First In, First Out");
   "all caps word" >::
-    ae "GIMP" (acronym "GNU Image Manipulation Program");
+    ae ~skip:true "GIMP" (fun _ -> acronym "GNU Image Manipulation Program");
   "punctuation without whitespace" >::
-    ae "CMOS" (acronym "Complementary metal-oxide semiconductor");
+    ae ~skip:true "CMOS" (fun _ -> acronym "Complementary metal-oxide semiconductor");
   "very long abbreviation" >::
-    ae "ROTFLSHTMDCOALM" (acronym "Rolling On The Floor Laughing So Hard That My Dogs Came Over And Licked Me");
+    ae ~skip:true "ROTFLSHTMDCOALM" (fun _ -> acronym "Rolling On The Floor Laughing So Hard That My Dogs Came Over And Licked Me");
   "consecutive delimiters" >::
-    ae "SIMUFTA" (acronym "Something - I made up from thin air");
+    ae ~skip:true "SIMUFTA" (fun _ -> acronym "Something - I made up from thin air");
 ]
 
 let () =

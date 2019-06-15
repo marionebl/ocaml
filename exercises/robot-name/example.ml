@@ -5,7 +5,7 @@ type robot = {mutable index : int}
 let index = ref (-1)
 
 let unique_ids: int array =
-  let ids = Array.init (26*26*1000) ~f:Fn.id in
+  let ids = Array.init (26*26*1001) ~f:Fn.id in
   Array.permute ids;
   ids
 

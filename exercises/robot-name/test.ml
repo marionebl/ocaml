@@ -2,6 +2,10 @@ open Base
 open OUnit2
 open Robot_name
 
+let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skip_if (skippable && cond) "Skipped"
+
 let assert_matches_spec name =
   let is_valid_letter ch = Char.('A' <= ch && ch <= 'Z') in
   let is_valid_digit ch = Char.('0' <= ch && ch <= '9') in
@@ -14,11 +18,13 @@ let assert_matches_spec name =
 
 let basic_tests = [
   "a robot has a name of 2 letters followed by 3 numbers" >:: (fun _ctxt ->
+    sk true;
     let n = name (new_robot ()) in
     assert_matches_spec n
     );
 
   "resetting a robot's name gives it a different name" >:: (fun _ctxt ->
+    sk true;
     let r = new_robot () in
     let n1 = name r in
     reset r;
@@ -27,6 +33,7 @@ let basic_tests = [
     );
 
   "after reset the robot's name still matches the specification" >:: (fun _ctxt ->
+    sk true;
     let r = new_robot () in
     reset r;
     let n = name r in
@@ -47,6 +54,7 @@ line at the bottom of this module.
 *)
 let unique_name_tests = [
   "all possible robot names are distinct" >:: (fun _ctxt ->
+    sk true;
     let rs = Array.init (26 * 26 * 1000) ~f:(fun _ -> new_robot ()) in
     let empty = Set.empty (module String) in
     let (repeated, _) = Array.fold rs ~init:(empty, empty) ~f:(fun (repeated, seen) r ->
@@ -62,4 +70,4 @@ let unique_name_tests = [
 ]
 
 let () =
-  run_test_tt_main ("robot-name tests" >::: List.concat [basic_tests (* ; unique_name_tests *)])
+  run_test_tt_main ("robot-name tests" >::: List.concat [basic_tests; unique_name_tests])

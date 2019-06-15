@@ -6,7 +6,13 @@ let printer = function
 | None -> "None"
 | Some x -> Int.to_string x
 
-let ae exp got _test_ctxt = assert_equal ~printer exp got
+let sk cond =
+  let skippable = try String.equal (Caml.Sys.getenv "FORCE") "false" with _ -> true in
+  skip_if (skippable && cond) "Skipped"
+
+let ae ~skip exp got _test_ctxt = 
+   sk skip;
+   assert_equal ~printer exp (got ())
 
 let dna_of_string s =
   let f = function
@@ -21,35 +27,35 @@ let hamdist a b = hamming_distance (dna_of_string a) (dna_of_string b)
 
 let tests = [
    "empty strands" >::
-      ae (Some 0) (hamdist "" "");
+      ae ~skip:false (Some 0) (fun _ -> hamdist "" "");
    "identical strands" >::
-      ae (Some 0) (hamdist "A" "A");
+      ae ~skip:false (Some 0) (fun _ -> hamdist "A" "A");
    "long identical strands" >::
-      ae (Some 0) (hamdist "GGACTGA" "GGACTGA");
+      ae ~skip:false (Some 0) (fun _ -> hamdist "GGACTGA" "GGACTGA");
    "complete distance in single nucleotide strands" >::
-      ae (Some 1) (hamdist "A" "G");
+      ae ~skip:false (Some 1) (fun _ -> hamdist "A" "G");
    "complete distance in small strands" >::
-      ae (Some 2) (hamdist "AG" "CT");
+      ae ~skip:false (Some 2) (fun _ -> hamdist "AG" "CT");
    "small distance in small strands" >::
-      ae (Some 1) (hamdist "AT" "CT");
+      ae ~skip:false (Some 1) (fun _ -> hamdist "AT" "CT");
    "small distance" >::
-      ae (Some 1) (hamdist "GGACG" "GGTCG");
+      ae ~skip:false (Some 1) (fun _ -> hamdist "GGACG" "GGTCG");
    "small distance in long strands" >::
-      ae (Some 2) (hamdist "ACCAGGG" "ACTATGG");
+      ae ~skip:false (Some 2) (fun _ -> hamdist "ACCAGGG" "ACTATGG");
    "non-unique character in first strand" >::
-      ae (Some 1) (hamdist "AAG" "AAA");
+      ae ~skip:false (Some 1) (fun _ -> hamdist "AAG" "AAA");
    "non-unique character in second strand" >::
-      ae (Some 1) (hamdist "AAA" "AAG");
+      ae ~skip:false (Some 1) (fun _ -> hamdist "AAA" "AAG");
    "same nucleotides in different positions" >::
-      ae (Some 2) (hamdist "TAG" "GAT");
+      ae ~skip:false (Some 2) (fun _ -> hamdist "TAG" "GAT");
    "large distance" >::
-      ae (Some 4) (hamdist "GATACA" "GCATAA");
+      ae ~skip:false (Some 4) (fun _ -> hamdist "GATACA" "GCATAA");
    "large distance in off-by-one strand" >::
-      ae (Some 9) (hamdist "GGACGGATTCTG" "AGGACGGATTCT");
+      ae ~skip:false (Some 9) (fun _ -> hamdist "GGACGGATTCTG" "AGGACGGATTCT");
    "disallow first strand longer" >::
-      ae None (hamdist "AATG" "AAA");
+      ae ~skip:false None (fun _ -> hamdist "AATG" "AAA");
    "disallow second strand longer" >::
-      ae None (hamdist "ATA" "AGTG");
+      ae ~skip:false None (fun _ -> hamdist "ATA" "AGTG");
 ]
 
 let () =
