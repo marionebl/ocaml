@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ocaml/opam2:alpine
+      - image: ocaml/opam2:alpine-3.9-ocaml-4.07
     steps:
       - run:
           name: Prepare
