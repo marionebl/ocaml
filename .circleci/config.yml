@@ -5,19 +5,13 @@ jobs:
     docker:
       - image: ocaml/opam2:alpine
     steps:
-      - checkout
       - run:
           name: Prepare
           command: sudo apk add m4 linux-headers
-      - restore-cache:
-          key: v1
       - run:
           name: Install
           command: opam install dune ocamlfind core base ounit qcheck react ppx_deriving
-      - save-cache:
-          key: v1
-          paths:
-            - ~/.opam/4.07
+      - checkout
       - run:
           name: Test
           command: eval $(opam env) && make test
