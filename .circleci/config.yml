@@ -1,0 +1,22 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: marionebl/ocaml-exercism-ci
+    steps:
+      - checkout
+      - run:
+          name: Clone Specs
+          command: sudo git clone https://github.com/exercism/problem-specifications.git /problem-specifications && cd ../problem-specifications && sudo git checkout 2af3c9b0074f16c62366c5c533eaacd3ff27b583
+      - run:
+          name: Generate Tests
+          command: cd /repo/tools/test-generator && sudo dune exec ./test_gen.exe --profile=release
+      - run:
+          name: Format Tests
+          command: sudo ocp-indent -i /repo/exercises/**/test.ml
+      - run:
+          name: Check Tests
+          command: /bin/bash /repo/.circleci/check-tests.sh
+      - run:
+          name: Test
+          command: eval $(opam env) && make test
