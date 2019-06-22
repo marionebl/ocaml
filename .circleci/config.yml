@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Clone Specs
-          command: sudo git clone https://github.com/exercism/problem-specifications.git /problem-specifications && cd ../problem-specifications && sudo git checkout 2af3c9b0074f16c62366c5c533eaacd3ff27b583
+          command: sudo git clone https://github.com/exercism/problem-specifications.git /problem-specifications && cd /problem-specifications && sudo git checkout 2af3c9b0074f16c62366c5c533eaacd3ff27b583
       - run:
           name: Generate Tests
           command: cd /repo/tools/test-generator && sudo dune exec ./test_gen.exe --profile=release
