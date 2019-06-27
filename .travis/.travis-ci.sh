@@ -41,7 +41,7 @@ sudo git checkout -- exercises/rectangles/test.ml
 sudo git checkout -- exercises/roman-numerals/test.ml
 sudo git checkout -- exercises/run-length-encoding/test.ml
 # sudo git checkout -- exercises/say/test.ml
-sudo git checkout -- exercises/space-age/test.ml
+# sudo git checkout -- exercises/space-age/test.ml
 # sudo git checkout -- exercises/triangle/test.ml
 # sudo git checkout -- exercises/word-count/test.ml
 
